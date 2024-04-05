@@ -1,0 +1,8 @@
+aiogram==3.0.0b7
+asyncpg==0.27.0
+matplotlib==3.8.0
+payok.io==1.0.3
+pydantic[dotenv]==1.10.7
+redis==4.5.4
+sqlalchemy==2.0.0
+validators==0.20.0
