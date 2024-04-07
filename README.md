@@ -50,10 +50,3 @@ POSTGRES_DB: your_database # Название БД
 ```shell
 sudo docker-compose up -d
 ```
-
-
-## psql.py
-Управление базой данных postgres через `psql.py`
-```bash
-python psql.py <query>
-```
