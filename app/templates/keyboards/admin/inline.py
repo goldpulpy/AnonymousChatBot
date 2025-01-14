@@ -1,11 +1,11 @@
-from app.database.models import Advert, Sponsor, RequestChannel, Room
-
+"""Admin inline keyboards"""
 from math import ceil
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from app.database.models import Advert, Sponsor, RequestChannel, Room
 
 
 def choice(item_id: int | str, prefix: str) -> InlineKeyboardMarkup:
-
+    """Choice keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -25,7 +25,7 @@ def choice(item_id: int | str, prefix: str) -> InlineKeyboardMarkup:
 
 
 def channels(channels: list[RequestChannel]) -> InlineKeyboardMarkup:
-
+    """Channels keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -51,7 +51,7 @@ def channels(channels: list[RequestChannel]) -> InlineKeyboardMarkup:
 
 
 def ref(ref: str) -> InlineKeyboardMarkup:
-
+    """Ref list keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -68,8 +68,8 @@ def ref(ref: str) -> InlineKeyboardMarkup:
     )
 
 
-def ref_list(refs: list[str], page: int=1) -> dict:
-
+def ref_list(refs: list[str], page: int = 1) -> dict:
+    """Ref list keyboard"""
     pages = ceil(len(refs)/9) or 1
     refs = refs[(page - 1) * 9:page * 9]
 
@@ -108,7 +108,7 @@ def ref_list(refs: list[str], page: int=1) -> dict:
 
 
 def sponsors(sponsors: list[Sponsor]) -> InlineKeyboardMarkup:
-
+    """Sponsors keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             *(
@@ -118,7 +118,9 @@ def sponsors(sponsors: list[Sponsor]) -> InlineKeyboardMarkup:
                         callback_data='sponsor:active:%i' % sponsor.id,
                     ),
                     InlineKeyboardButton(
-                        text=('🤖 ' if sponsor.is_bot else '💬 ') + sponsor.title,
+                        text=(
+                            '🤖 ' if sponsor.is_bot else '💬 '
+                        ) + sponsor.title,
                         callback_data='none',
                     ),
                     InlineKeyboardButton(
@@ -142,7 +144,7 @@ def sponsors(sponsors: list[Sponsor]) -> InlineKeyboardMarkup:
 
 
 def adverts(adverts: list[Advert]) -> dict:
-
+    """Adverts keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             *(
@@ -174,8 +176,9 @@ def adverts(adverts: list[Advert]) -> dict:
         ],
     )
 
-def rooms(rooms: list[Room]) -> InlineKeyboardMarkup:
 
+def rooms(rooms: list[Room]) -> InlineKeyboardMarkup:
+    """Rooms keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             *(
@@ -185,7 +188,12 @@ def rooms(rooms: list[Room]) -> InlineKeyboardMarkup:
                         callback_data='room:info:%i' % room.id,
                     ),
                     InlineKeyboardButton(
-                        text='👤 %i/%s' % (room.room_online_members, room.room_online_limit if room.room_online_limit != 0 else '∞'),
+                        text='👤 %i/%s' % (
+                            room.room_online_members,
+                            room.room_online_limit
+                            if room.room_online_limit != 0
+                            else '∞',
+                        ),
                         callback_data='room:members:%i' % room.id,
                     ),
                     InlineKeyboardButton(
@@ -201,16 +209,16 @@ def rooms(rooms: list[Room]) -> InlineKeyboardMarkup:
                 )
             ],
         ],
-)
+    )
 
 
 def room_info(room: Room) -> InlineKeyboardMarkup:
-
+    """Room info keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text= 'Удалить комнату🗑',
+                    text='Удалить комнату🗑',
                     callback_data='room:del:%i' % room.id,
 
                 )
@@ -223,6 +231,7 @@ def room_info(room: Room) -> InlineKeyboardMarkup:
             ],
         ],
     )
+
 
 DUMP = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -239,7 +248,7 @@ DUMP = InlineKeyboardMarkup(
                 text='Обычных',
                 callback_data='dump:vip',
             ),
-        ],  
+        ],
     ],
 )
 

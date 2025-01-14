@@ -1,20 +1,19 @@
+"""User model"""
+import json
+from typing import Optional, List
+from datetime import datetime, timedelta
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import JSON
 from . import Base
 from .base import bigint
 from .dialogue import Dialogue
 
-from typing import Optional,List
-from datetime import datetime, timedelta
-
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Column, String, ARRAY, JSON
-
-import json
 
 class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[bigint] = mapped_column(primary_key=True, autoincrement=True)
-    
+
     username: Mapped[Optional[str]] = mapped_column(default=None)
     first_name: Mapped[Optional[str]] = mapped_column(default=None)
     last_name: Mapped[Optional[str]] = mapped_column(default=None)
@@ -30,13 +29,16 @@ class User(Base):
     age: Mapped[Optional[int]]
     is_man: Mapped[Optional[bool]]
 
-    vip_time: Mapped[datetime] = mapped_column(default=datetime.fromtimestamp(0))
+    vip_time: Mapped[datetime] = mapped_column(
+        default=datetime.fromtimestamp(0)
+    )
     balance: Mapped[int] = mapped_column(default=0)
     chat_only: Mapped[bool] = mapped_column(default=False)
-    
+
     is_admin: Mapped[bool] = mapped_column(default=False)
     is_banned: Mapped[bool] = mapped_column(default=False)
-    friends: Mapped[List[Optional[str]]] = mapped_column(type_=JSON, default=[])
+    friends: Mapped[List[Optional[str]]] = mapped_column(
+        type_=JSON, default=[])
 
     in_room: Mapped[int] = mapped_column(default=0)
 
@@ -44,11 +46,10 @@ class User(Base):
 
     partner: Mapped[Optional["Dialogue"]] = relationship(
         primaryjoin="or_("
-        "    User.id==Dialogue.first," 
+        "    User.id==Dialogue.first,"
         "    User.id==Dialogue.second,"
         ")",
     )
-
 
     @property
     def friends_list(self):
@@ -57,17 +58,12 @@ class User(Base):
         return []
 
     def is_friend(self, friend_id: int) -> bool:
-
         current_friends = self.friends_list if self.friends else []
-
         if friend_id in current_friends:
-
             return True
-
         return False
 
-    def add_friend(self, friend_id: int):
-
+    def add_friend(self, friend_id: int) -> None:
         current_friends = self.friends_list if self.friends else []
 
         if friend_id not in current_friends:
@@ -75,7 +71,7 @@ class User(Base):
 
         self.friends = json.dumps(current_friends)
 
-    def remove_friend(self, friend_id: int):
+    def remove_friend(self, friend_id: int) -> None:
 
         current_friends = self.friends_list if self.friends else []
 
@@ -84,25 +80,24 @@ class User(Base):
 
         self.friends = json.dumps(current_friends)
 
-
     @property
     def partner_id(self) -> int:
-
-        return self.partner.get_id(self.id)    
+        return self.partner.get_id(self.id)
 
     @property
     def is_vip(self) -> bool:
-
         return (
             self.vip_time is not None
-             and self.vip_time > datetime.now()
+            and self.vip_time > datetime.now()
         )
 
-    def add_vip(self, days: int):
+    def add_vip(self, days: int) -> None:
         """
         Add VIP days to user. You need to commit after.
 
         :param int days: Amount of days
         """
 
-        self.vip_time = max(self.vip_time, datetime.now()) + timedelta(days=days)
+        self.vip_time = max(
+            self.vip_time, datetime.now()
+        ) + timedelta(days=days)

@@ -1,44 +1,46 @@
+"""Admin commands"""
 from aiogram.types import BotCommand
+
 
 ADMIN_COMMANDS = [
     BotCommand(
-        command="start", 
+        command="start",
         description="Запустить бота",
     ),
     BotCommand(
-        command="stats", 
+        command="stats",
         description="Статистика",
     ),
     BotCommand(
-        command="dump", 
+        command="dump",
         description="Выгрузка",
     ),
     BotCommand(
-        command="mailing", 
+        command="mailing",
         description="Рассылка",
     ),
     BotCommand(
-        command="referrals", 
+        command="referrals",
         description="Рефералы",
     ),
     BotCommand(
-        command="sponsors", 
+        command="sponsors",
         description="Спонсоры",
     ),
     BotCommand(
-        command="adverts", 
+        command="adverts",
         description="Реклама",
     ),
     BotCommand(
-        command="requests", 
+        command="requests",
         description="Заявки",
     ),
     BotCommand(
-        command="money", 
+        command="money",
         description="Прибыль",
     ),
     BotCommand(
-        command="admin", 
+        command="admin",
         description="Выдать / убрать админку",
     ),
     BotCommand(

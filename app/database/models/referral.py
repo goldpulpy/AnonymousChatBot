@@ -1,11 +1,11 @@
-from . import Base
-
+"""Referral model"""
 from typing import Optional
-
 from sqlalchemy.orm import Mapped, mapped_column
+from . import Base
 
 
 class Referral(Base):
+    """Referral model"""
     __tablename__ = 'referrals'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

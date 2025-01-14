@@ -1,26 +1,33 @@
-from app.filters import IsVip, IsRegistered
-from app.templates import texts
-from app.templates.keyboards import user as nav
-from app.database.models import Referral, User
-from app.handlers.user.dialogue import delete_dialogue
+"""Start handlers"""
 
 from aiogram import Router, types, Bot
-from aiogram.filters import CommandStart, Text, StateFilter, CommandObject
+from aiogram.filters import CommandStart, Text, CommandObject
 from aiogram.fsm.context import FSMContext
 
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.handlers.user.rooms import leave_room
+from app.filters import IsVip, IsRegistered
+from app.templates import texts
+from app.templates.keyboards import user as nav
+from app.database.models import Referral, User
+from app.handlers.user.dialogue import delete_dialogue
 
-async def start(message: types.Message, bot: Bot, command: CommandObject, session: AsyncSession, user: User, state: FSMContext):
+
+async def start(
+    message: types.Message,
+    bot: Bot,
+    command: CommandObject,
+    session: AsyncSession,
+    user: User,
+    state: FSMContext,
+) -> None:
 
     if user.in_room != 0:
-
         await leave_room(message, session, bot, user)
-    
-    if user.is_man is None:
 
+    if user.is_man is None:
         await state.set_state('start')
         await message.answer(
             '<i><b>Добро пожаловать в анонимный чат! Выбери свой пол:</></>',
@@ -28,18 +35,15 @@ async def start(message: types.Message, bot: Bot, command: CommandObject, sessio
         )
 
     else:
-
         await message.answer(
-            texts.user.START, 
+            texts.user.START,
             reply_markup=nav.reply.main_menu(user),
         )
 
         if user.partner:
-
             await delete_dialogue(session, message.from_user.id)
 
     if not command.args:
-
         return
 
     await session.execute(
@@ -50,8 +54,8 @@ async def start(message: types.Message, bot: Bot, command: CommandObject, sessio
     await session.commit()
 
 
-async def pre_reg(message: types.Message, state: FSMContext):
-
+async def pre_reg(message: types.Message, state: FSMContext) -> None:
+    """Pre registration"""
     await state.set_state('start')
     await message.answer(
         '<i><b>Добро пожаловать в анонимный чат! Выбери свой пол:</></>',
@@ -59,9 +63,8 @@ async def pre_reg(message: types.Message, state: FSMContext):
     )
 
 
-def register(router: Router):
-
+def register(router: Router) -> None:
+    """Register start handlers"""
     router.message.register(start, CommandStart())
     router.message.register(start, Text('Поиск по полу ♂️'), IsVip())
-
     router.message.register(pre_reg, IsRegistered(False))

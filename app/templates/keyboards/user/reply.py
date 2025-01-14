@@ -1,22 +1,20 @@
-from app.database.models import User
-
+"""User keyboards"""
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from app.database.models import User
 
 
 def main_menu(user: User) -> ReplyKeyboardMarkup:
-
+    """Main menu keyboard"""
     if user.is_vip:
-
         return VIP_MENU
-
-    return USER_MENU # VIP_MENU
+    return USER_MENU  # VIP_MENU
 
 
 VIP_MENU = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Случайный диалог 🔍'),
-        ],        
+        ],
         [
             KeyboardButton(text='Поиск Ж 👩'),
             KeyboardButton(text='Поиск М 👨'),
@@ -31,7 +29,7 @@ VIP_MENU = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text='VIP 👑'),
-        ], 
+        ],
     ],
     resize_keyboard=True,
 )
@@ -54,7 +52,7 @@ USER_MENU = ReplyKeyboardMarkup(
         [
             KeyboardButton(text='VIP 👑'),
         ],
-    ], 
+    ],
     resize_keyboard=True,
 )
 
@@ -97,7 +95,7 @@ ROOM_MENU = ReplyKeyboardMarkup(
         [
             KeyboardButton(text='Выйти из комнаты 🚪'),
         ],
-                [
+        [
             KeyboardButton(text='Участники 👤'),
         ],
         [
@@ -106,7 +104,6 @@ ROOM_MENU = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True,
 )
-
 
 
 JOIN_REQUEST = ReplyKeyboardMarkup(
@@ -121,5 +118,5 @@ JOIN_REQUEST = ReplyKeyboardMarkup(
             KeyboardButton(text='🛩️'),
             KeyboardButton(text='⏳'),
         ],
-    ],  
+    ],
 )

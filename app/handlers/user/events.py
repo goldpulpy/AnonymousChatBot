@@ -1,64 +1,58 @@
+"""Events handlers"""
 import random
-
-from app.templates.keyboards import user as nav
-from app.database.models import User, Request, RequestChannel
-
 from datetime import datetime, timedelta
 from contextlib import suppress
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Text
 from aiogram.exceptions import TelegramAPIError
-
 from sqlalchemy import delete
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.templates.keyboards import user as nav
+from app.database.models import User, Request, RequestChannel
+
 
 EMOJIS = ['🛥️', '🛩️', '🏎️', '⏳', '👾', '🌐']
 
-async def my_chat_member(update: types.ChatMemberUpdated, session: AsyncSession, user: User):
 
+async def my_chat_member(
+    update: types.ChatMemberUpdated, session: AsyncSession, user: User
+) -> None:
+    """My chat member handler"""
     if update.chat.type == 'channel':
-
         return
 
     if update.chat.type != 'private':
-
         if update.new_chat_member.status in ('left', 'kicked'):
-
             await session.execute(
                 delete(User)
                 .where(User.id == update.chat.id)
             )
 
         elif not await session.get(User, update.chat.id):
-            
             session.add(
                 User(id=update.chat.id)
             )
     else:
-        
         if update.new_chat_member.status in ("left", "kicked"):
-
             user.block_date = datetime.now()
-
         elif user.block_date:
-
             user.block_date = None
-    
     await session.commit()
 
 
-async def chat_join_request(update: types.ChatJoinRequest, bot: Bot, session: AsyncSession):
-
+async def chat_join_request(
+    update: types.ChatJoinRequest, bot: Bot, session: AsyncSession
+) -> None:
+    """Chat join request handler"""
     channel = await session.scalar(
         select(RequestChannel)
         .where(RequestChannel.id == update.chat.id)
     )
-    
+
     if not channel:
-        
         channel = RequestChannel(
             id=update.chat.id,
             title=update.chat.title or str(update.chat.id),
@@ -67,7 +61,6 @@ async def chat_join_request(update: types.ChatJoinRequest, bot: Bot, session: As
         return await session.commit()
 
     if not channel.active:
-
         return
 
     channel.visits += 1
@@ -77,12 +70,13 @@ async def chat_join_request(update: types.ChatJoinRequest, bot: Bot, session: As
 
         await bot.send_message(
             update.from_user.id,
-            '❌ <b>Ваши действия похожи на робота.</b>\nДля принятия заявки пройдите проверку.\n❗<i>Выберите %s на клавиатуре ниже</i>' % emoji,
+            '❌ <b>Ваши действия похожи на робота.</b>\n'
+            'Для принятия заявки пройдите проверку.\n'
+            '❗<i>Выберите %s на клавиатуре ниже</i>' % emoji,
             reply_markup=nav.reply.JOIN_REQUEST,
         )
 
     except TelegramAPIError:
-
         return await update.approve()
 
     session.add(
@@ -95,10 +89,11 @@ async def chat_join_request(update: types.ChatJoinRequest, bot: Bot, session: As
     await session.commit()
 
 
-async def safe_approve(bot: Bot, request: Request, session: AsyncSession):
-
+async def safe_approve(
+    bot: Bot, request: Request, session: AsyncSession
+) -> None:
+    """Safe approve handler"""
     with suppress(TelegramAPIError):
-
         await bot.approve_chat_join_request(
             chat_id=request.chat_id,
             user_id=request.user_id,
@@ -110,8 +105,10 @@ async def safe_approve(bot: Bot, request: Request, session: AsyncSession):
     )
 
 
-async def captcha(message: types.Message, bot: Bot, session: AsyncSession, user: User):
-
+async def captcha(
+    message: types.Message, bot: Bot, session: AsyncSession, user: User
+) -> None:
+    """Captcha handler"""
     await message.answer(
         'Ваша заявка принята ✅',
         reply_markup=nav.reply.main_menu(user),
@@ -123,15 +120,13 @@ async def captcha(message: types.Message, bot: Bot, session: AsyncSession, user:
     )
 
     for request in requests.all():
-
         await safe_approve(bot, request, session)
 
     await session.commit()
 
 
-def register(dp: Dispatcher):
-
+def register(dp: Dispatcher) -> None:
+    """Register handlers"""
     dp.my_chat_member.register(my_chat_member)
     dp.chat_join_request.register(chat_join_request)
-
     dp.message.register(captcha, Text(EMOJIS))

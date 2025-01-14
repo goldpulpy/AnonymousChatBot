@@ -1,3 +1,4 @@
+"""Callback middleware"""
 from contextlib import suppress
 from typing import Any, Awaitable, Callable, Dict
 
@@ -11,14 +12,12 @@ class CallbackMiddleware(BaseMiddleware):
     """
 
     async def __call__(
-        self, 
+        self,
         handler: Callable[[Update, Dict[str, Any]], Awaitable[Any]],
         call: CallbackQuery,
         data: Dict[str, Any],
     ) -> Any:
-    
+        """Callback middleware"""
         await handler(call, data)
-
         with suppress(exceptions.TelegramAPIError):
-
             await call.answer()

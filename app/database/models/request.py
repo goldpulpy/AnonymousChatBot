@@ -1,12 +1,12 @@
+"""Request model"""
+from datetime import datetime
+from sqlalchemy.orm import Mapped, mapped_column
 from . import Base
 from .base import bigint
 
-from datetime import datetime
-
-from sqlalchemy.orm import Mapped, mapped_column
-
 
 class Request(Base):
+    """Request model"""
     __tablename__ = 'requests'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

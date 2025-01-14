@@ -1,14 +1,14 @@
+"""Queue model"""
+from typing import Optional
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base
 from .base import bigint
 from .user import User
 
-from typing import Optional
-
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 
 class Queue(Base):
+    """Queue model"""
     __tablename__ = 'queue'
 
     id: Mapped[bigint] = mapped_column(ForeignKey(User.id), primary_key=True)

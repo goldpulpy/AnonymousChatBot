@@ -1,3 +1,4 @@
+"""Set commands utils"""
 import asyncio
 
 from app.utils.config import Settings
@@ -15,11 +16,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 async def set_commands(
-    bot: Bot, 
-    config: Settings, 
-    sessionmaker: Optional[async_sessionmaker]=None, 
-    session: Optional[AsyncSession]=None,
-):
+    bot: Bot,
+    config: Settings,
+    sessionmaker: Optional[async_sessionmaker] = None,
+    session: Optional[AsyncSession] = None,
+) -> None:
     """
     Set bot commands for users and admins.
 
@@ -31,7 +32,6 @@ async def set_commands(
     await bot.set_my_commands(USER_COMMANDS)
 
     if sessionmaker:
-
         session = sessionmaker()
 
     admin_ids = await session.scalars(
@@ -40,23 +40,18 @@ async def set_commands(
     )
 
     if sessionmaker:
-
         await asyncio.shield(session.close())
 
     for chat_id in admin_ids.all():
-
         with suppress(exceptions.TelegramBadRequest):
-
             await bot.set_my_commands(
-                ADMIN_COMMANDS[:-1] + USER_COMMANDS[1:],  # remove /admin and second /start from list
+                ADMIN_COMMANDS[:-1] + USER_COMMANDS[1:],
                 scope=BotCommandScopeChat(chat_id=chat_id),
             )
 
     for chat_id in config.bot.admins:
-
         with suppress(exceptions.TelegramBadRequest):
-
             await bot.set_my_commands(
-                ADMIN_COMMANDS + USER_COMMANDS[1:],  # remove /start
+                ADMIN_COMMANDS + USER_COMMANDS[1:],
                 scope=BotCommandScopeChat(chat_id=chat_id),
             )

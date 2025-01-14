@@ -1,3 +1,4 @@
+"""Mailing utils"""
 import time
 import asyncio
 
@@ -9,26 +10,24 @@ from aiogram.exceptions import TelegramAPIError, TelegramRetryAfter
 
 
 class MailerSingleton(object):
-
+    """Mailer singleton class"""
     DEFAULT_DELAY = 1/25
     __instance = None
 
-
-    def __init__(self, delay: int | float=None) -> None:
+    def __init__(self, delay: int | float = None) -> None:
         """
-        Creator of MailerSingleton. Raises an exception if an instance already exists.
+        Creator of MailerSingleton. Raises an exception if an instance already
+        exists.
 
         :param int | float delay: Delay between messages, optional.
         :raises Exception: If an instance already exists.
         """
 
         if MailerSingleton.__instance is not None:
-
             raise Exception('MailingSingleton is a singleton!')
 
         self.delay = delay or self.DEFAULT_DELAY
         MailerSingleton.__instance = self
-
 
     @staticmethod
     def get_instance() -> 'MailerSingleton':
@@ -39,11 +38,8 @@ class MailerSingleton(object):
         """
 
         if MailerSingleton.__instance is None:
-
             MailerSingleton()
-
         return MailerSingleton.__instance
-
 
     @staticmethod
     def pretty_time(seconds: float) -> str:
@@ -55,13 +51,11 @@ class MailerSingleton(object):
         """
 
         seconds = int(seconds)
-
         return '%0d:%0d:%0d' % (
             seconds // 3600,
             seconds % 3600 // 60,
             seconds % 60
         )
-
 
     @classmethod
     def get_text(cls, scope: list[int], sent: int, delay: float) -> str:
@@ -84,16 +78,15 @@ class MailerSingleton(object):
             cls.pretty_time((len(scope) - sent) * delay)
         )
 
-
     async def start_mailing(
-        self, 
-        message_id: int, 
-        reply_markup: Optional[dict], 
-        chat_id: int, 
-        bot: Bot, 
-        scope: list[int], 
+        self,
+        message_id: int,
+        reply_markup: Optional[dict],
+        chat_id: int,
+        bot: Bot,
+        scope: list[int],
         cancel_keyboard: dict
-    ):
+    ) -> None:
         """
         Start mailing.
 
@@ -119,17 +112,12 @@ class MailerSingleton(object):
         self.last_update = time.monotonic()
 
         for sent, user_id in enumerate(scope, 1):
-
             if self.TIME_STARTED != time_started:
-
                 break
 
             if time.monotonic() - self.last_update > 2:
-
                 self.last_update = time.monotonic()
-
                 with suppress(TelegramAPIError):
-                    
                     await message.edit_text(
                         self.get_text(
                             scope, sent, delay,
@@ -138,7 +126,6 @@ class MailerSingleton(object):
                     )
 
             try:
-
                 await bot.copy_message(
                     chat_id=user_id,
                     from_chat_id=chat_id,
@@ -147,18 +134,15 @@ class MailerSingleton(object):
                 )
 
             except TelegramRetryAfter as exc:
-
                 delay *= 2
                 await asyncio.sleep(exc.retry_after)
 
             except TelegramAPIError:
-
                 blocked += 1
 
             await asyncio.sleep(delay)
 
         with suppress(TelegramAPIError):
-
             await message.edit_text(
                 self.get_text(
                     scope, len(scope), delay,
@@ -171,7 +155,6 @@ class MailerSingleton(object):
             ),
         )
 
-
     def stop_mailing(self) -> bool:
         """
         Stops mailing. Returns True on success.
@@ -180,13 +163,10 @@ class MailerSingleton(object):
         """
 
         if self.TIME_STARTED == 0:
-
             return False
 
         self.TIME_STARTED = 0
-
         return True
-
 
     @property
     def is_mailing(self) -> bool:

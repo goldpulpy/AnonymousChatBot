@@ -1,3 +1,4 @@
+"""Times utils"""
 from datetime import date, timedelta
 
 
