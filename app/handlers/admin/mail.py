@@ -1,22 +1,21 @@
+"""Mail handlers"""
 import asyncio
+from datetime import datetime
+
+from aiogram import Router, Bot, types
+from aiogram.filters import Text, Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.filters import ContentTypes
 from app.utils.mailing import MailerSingleton
 from app.database.models import User
 from app.templates.keyboards import admin as nav
 
-from datetime import datetime
 
-from aiogram import Router, Bot, types
-from aiogram.filters import Text, Command, StateFilter
-from aiogram.fsm.context import FSMContext
-
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-async def pre_mailing(message: types.Message, state: FSMContext):
-    
+async def pre_mailing(message: types.Message, state: FSMContext) -> None:
+    """Pre mailing handler"""
     await message.answer(
         "Что вы хотите отправить?",
         reply_markup=nav.inline.CANCEL,
@@ -24,8 +23,8 @@ async def pre_mailing(message: types.Message, state: FSMContext):
     await state.set_state("mailing.text")
 
 
-async def mailing_text(message: types.Message, state: FSMContext):
-
+async def mailing_text(message: types.Message, state: FSMContext) -> None:
+    """Mailing text handler"""
     await state.update_data(
         message_id=message.message_id,
         reply_markup=(
@@ -35,19 +34,19 @@ async def mailing_text(message: types.Message, state: FSMContext):
     )
 
     await message.copy_to(
-        message.from_user.id,
-        reply_markup=message.reply_markup,
+        message.from_user.id, reply_markup=message.reply_markup,
     )
     await message.answer(
-        "Начинаю рассылку?",
-        reply_markup=nav.reply.CONFIRM,
+        "Начинаю рассылку?", reply_markup=nav.reply.CONFIRM,
     )
 
     await state.set_state("mailing.confirm")
 
 
-async def mailing_confirm(message: types.Message, bot: Bot, state: FSMContext, session: AsyncSession):
-
+async def mailing_confirm(
+    message: types.Message, bot: Bot, state: FSMContext, session: AsyncSession,
+) -> None:
+    """Mailing confirm handler"""
     if message.text == 'Подтвердить':
 
         data = await state.get_data()
@@ -59,49 +58,50 @@ async def mailing_confirm(message: types.Message, bot: Bot, state: FSMContext, s
         )).all()
 
         await message.answer(
-            'Начинаю рассылку...',
-            reply_markup=nav.reply.MENU,
+            'Начинаю рассылку...', reply_markup=nav.reply.MENU,
         )
 
         mailer = MailerSingleton.get_instance()
         asyncio.create_task(mailer.start_mailing(
-            data['message_id'], data['reply_markup'], 
+            data['message_id'], data['reply_markup'],
             message.chat.id, bot, scope,
             cancel_keyboard=nav.inline.STOPMAIL,
         ))
 
     else:
-
         await message.answer("Рассылка отменена.", reply_markup=nav.reply.MENU)
 
     await state.clear()
 
 
-async def stop_mailing(call: types.CallbackQuery):
-
+async def stop_mailing(call: types.CallbackQuery) -> None:
+    """Stop mailing handler"""
     MailerSingleton.get_instance().stop_mailing()
-    
+
     await call.message.delete()
     await call.answer("Рассылка остановлена.")
 
 
-async def cancel_mailing(call: types.CallbackQuery, state: FSMContext):
-
+async def cancel_mailing(
+    call: types.CallbackQuery, state: FSMContext,
+) -> None:
+    """Cancel mailing handler"""
     await state.clear()
 
     await call.message.delete()
     await call.answer("Отменено.")
 
 
-def register(router: Router):
-
+def register(router: Router) -> None:
+    """Register mail handlers"""
     router.message.register(pre_mailing, Command("mailing"))
     router.message.register(pre_mailing, Text("Рассылка"))
-
-    router.message.register(mailing_text, StateFilter("mailing.text"), ContentTypes(types.ContentType.ANY))
-    router.callback_query.register(cancel_mailing, Text("cancel"), StateFilter("mailing.text"))
-
+    router.message.register(
+        mailing_text, StateFilter("mailing.text"),
+        ContentTypes(types.ContentType.ANY),
+    )
+    router.callback_query.register(
+        cancel_mailing, Text("cancel"), StateFilter("mailing.text"),
+    )
     router.message.register(mailing_confirm, StateFilter("mailing.confirm"))
-
     router.callback_query.register(stop_mailing, Text("stopmail"))
-    
