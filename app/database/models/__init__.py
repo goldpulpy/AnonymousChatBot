@@ -1,3 +1,4 @@
+"""Database models"""
 from .base import Base
 from .advert import Advert
 from .bill import Bill

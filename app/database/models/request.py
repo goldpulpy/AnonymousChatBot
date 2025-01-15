@@ -1,8 +1,7 @@
 """Request model"""
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from . import Base
-from .base import bigint
+from .base import bigint, Base
 
 
 class Request(Base):

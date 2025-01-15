@@ -23,6 +23,7 @@ async def start(
     user: User,
     state: FSMContext,
 ) -> None:
+    """Start handler"""
 
     if user.in_room != 0:
         await leave_room(message, session, bot, user)

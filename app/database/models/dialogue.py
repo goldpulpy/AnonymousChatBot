@@ -1,8 +1,7 @@
 """Dialogue model"""
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
-from . import Base
-from .base import bigint
+from .base import bigint, Base
 
 
 class Dialogue(Base):

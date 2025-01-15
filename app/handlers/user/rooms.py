@@ -395,7 +395,7 @@ async def chatting(
                 pass
 
 
-def register(router: Router):
+def register(router: Router) -> None:
     """Register handlers"""
     router.message.register(room_list, Text("Комнаты 🏠"))
     router.message.register(leave_room, Text("Выйти из комнаты 🚪"))

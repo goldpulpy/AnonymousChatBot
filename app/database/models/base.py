@@ -9,8 +9,4 @@ bigint = Annotated[int, 64]
 
 class Base(DeclarativeBase):
     """Base model"""
-    registry = registry(
-        type_annotation_map={
-            bigint: BigInteger,
-        },
-    )
+    registry = registry(type_annotation_map={bigint: BigInteger})

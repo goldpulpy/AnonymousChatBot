@@ -5,7 +5,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import JSON
 from room_nicknames import MAN, FEMALE
-from . import Base
+from .base import Base
 
 
 class Room(Base):
@@ -90,6 +90,7 @@ class Room(Base):
         return None
 
     def change_nickname(self, user_id: int, nickname: str) -> None:
+        """Change nickname"""
         members = self.room_members_list if self.room_members else []
         for member in members:
             if member.get("user_id") == user_id:

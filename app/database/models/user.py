@@ -4,8 +4,7 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import JSON
-from . import Base
-from .base import bigint
+from .base import bigint, Base
 from .dialogue import Dialogue
 
 

@@ -2,8 +2,7 @@
 from typing import Optional
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from . import Base
-from .base import bigint
+from .base import bigint, Base
 from .user import User
 
 

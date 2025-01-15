@@ -1,7 +1,6 @@
 """Request channel model"""
 from sqlalchemy.orm import Mapped, mapped_column
-from . import Base
-from .base import bigint
+from .base import bigint, Base
 
 
 class RequestChannel(Base):

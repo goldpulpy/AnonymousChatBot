@@ -1,7 +1,7 @@
 """Referral model"""
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
-from . import Base
+from .base import Base
 
 
 class Referral(Base):

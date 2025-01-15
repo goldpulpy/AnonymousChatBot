@@ -1,6 +1,6 @@
 """Sponsor model"""
 from sqlalchemy.orm import Mapped, mapped_column
-from . import Base
+from .base import Base
 
 
 class Sponsor(Base):
