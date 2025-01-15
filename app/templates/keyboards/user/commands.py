@@ -1,9 +1,10 @@
+"""User commands"""
 from aiogram.types import BotCommand
 
 
 USER_COMMANDS = [
     BotCommand(
-        command="start", 
+        command="start",
         description="Запустить бота",
     ),
 ]

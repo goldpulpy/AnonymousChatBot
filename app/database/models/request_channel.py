@@ -1,12 +1,12 @@
-from . import Base
-from .base import bigint
-
+"""Request channel model"""
 from sqlalchemy.orm import Mapped, mapped_column
+from .base import bigint, Base
 
 
 class RequestChannel(Base):
+    """Request channel model"""
     __tablename__ = 'request_channels'
-    
+
     id: Mapped[bigint] = mapped_column(primary_key=True, autoincrement=True)
 
     active: Mapped[bool] = mapped_column(default=False)

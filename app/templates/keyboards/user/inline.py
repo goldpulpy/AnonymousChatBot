@@ -1,20 +1,21 @@
-from settings import VIP_OPTIONS
-from app.database.models import Sponsor
-from app.utils.payments import BaseBill
-
+"""User inline keyboards"""
+from typing import List
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from prices import VIP_OPTIONS
+from app.database.models import Sponsor, Room
+from app.utils.payments import BaseBill
 
 
 def split(items: list, size: int) -> list[list]:
-
+    """Split items into chunks"""
     return [
-        items[index:index + size] 
+        items[index:index + size]
         for index in range(0, len(items), size)
     ]
 
 
 def subscription(sponsors: list[Sponsor]) -> InlineKeyboardMarkup:
-
+    """Subscription keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             *(
@@ -35,8 +36,10 @@ def subscription(sponsors: list[Sponsor]) -> InlineKeyboardMarkup:
     )
 
 
-def bill(bill: BaseBill, item_id: str, is_vip: bool = True) -> InlineKeyboardMarkup:
-
+def bill(
+    bill: BaseBill, item_id: str, is_vip: bool = True
+) -> InlineKeyboardMarkup:
+    """Bill keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -63,32 +66,35 @@ def bill(bill: BaseBill, item_id: str, is_vip: bool = True) -> InlineKeyboardMar
         ]
     )
 
+
 def choose_bill(item_id) -> InlineKeyboardMarkup:
+    """Choose bill keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='Оплатить балансом 💰',
-                callback_data='buy:balance:%s' % item_id,
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='Оплатить cсылкой 🔗',
-                callback_data='buy:url:%s' % item_id,
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='Назад 🔙',
-                callback_data='back:vip',
-            ),
-        ],
-    ]
-)
+            [
+                InlineKeyboardButton(
+                    text='Оплатить балансом 💰',
+                    callback_data='buy:balance:%s' % item_id,
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text='Оплатить cсылкой 🔗',
+                    callback_data='buy:url:%s' % item_id,
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text='Назад 🔙',
+                    callback_data='back:vip',
+                ),
+            ],
+        ]
+    )
+
 
 def confirm_buy_balance(item_id) -> InlineKeyboardMarkup:
-
+    """Confirm buy balance keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -246,8 +252,9 @@ PRE_CHANGE_NICKNAME = InlineKeyboardMarkup(
     ],
 )
 
-def change_nickname(new_nickname: dict) -> InlineKeyboardMarkup:
 
+def change_nickname(new_nickname: dict) -> InlineKeyboardMarkup:
+    """Change nickname keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -267,12 +274,14 @@ def change_nickname(new_nickname: dict) -> InlineKeyboardMarkup:
 
 
 def friends(friends_list: dict) -> InlineKeyboardMarkup:
-
+    """Friends keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text='%s - %s' %  (friend['status'], friend['user'].first_name),
+                    text='%s - %s' % (
+                        friend['status'], friend['user'].first_name
+                    ),
                     callback_data='friend:get:%i' % friend['user'].id,
                 )
             ] for friend in friends_list
@@ -281,7 +290,7 @@ def friends(friends_list: dict) -> InlineKeyboardMarkup:
 
 
 def friend(friend_id: dict) -> InlineKeyboardMarkup:
-
+    """Friend keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -299,8 +308,9 @@ def friend(friend_id: dict) -> InlineKeyboardMarkup:
         ]
     )
 
-def friend_dialogue_request(friend_id: int) -> InlineKeyboardMarkup:
 
+def friend_dialogue_request(friend_id: int) -> InlineKeyboardMarkup:
+    """Friend dialogue request keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -319,15 +329,18 @@ def friend_dialogue_request(friend_id: int) -> InlineKeyboardMarkup:
     )
 
 
-def room_list(rooms: list) -> InlineKeyboardMarkup:
-
+def room_list(rooms: List[Room]) -> InlineKeyboardMarkup:
+    """Room list keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🏠 [%s/%s] %s" % (room.room_online_members,
-                    room.room_online_limit if room.room_online_limit != 0 else '∞',
-                    room.room_name),
+                    text="🏠 [%s/%s] %s" % (
+                        room.room_online_members,
+                        room.room_online_limit
+                        if room.room_online_limit != 0 else '∞',
+                        room.room_name,
+                    ),
                     callback_data='join:room:%i' % room.id,
                 )
             ] for room in rooms

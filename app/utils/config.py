@@ -1,73 +1,79 @@
+"""Config utils"""
+from typing import Any
+from pydantic import BaseSettings, validator
+from functools import lru_cache
 import json
 
-from pydantic import BaseSettings, validator
+
+class BaseConfig(BaseSettings):
+    """Base config with shared settings"""
+    class Config:
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
 
 
-class DB(BaseSettings):
-    
+class DB(BaseConfig):
+    """Database settings"""
     host: str
     port: int
     name: str
     user: str
     password: str
 
+    class Config:
+        env_prefix = 'DB_'
 
-class Redis(BaseSettings):
-    
+
+class Redis(BaseConfig):
+    """Redis settings"""
     host: str
     db: int
 
+    class Config:
+        env_prefix = 'REDIS_'
 
-class Bot(BaseSettings):
-    
+
+class Bot(BaseConfig):
+    """Bot settings"""
     token: str
     timezone: str
     admins: list[int]
     moders: list[int]
     use_redis: bool
 
-    @validator("admins", pre=True, always=True)
-    def admin_ids(cls, string) -> list[int]:
-        
-        return json.loads(string)
-    
-    @validator("moders", pre=True, always=True)
-    def moder_ids(cls, string) -> list[int]:
-        
-        return json.loads(string)
+    class Config:
+        env_prefix = 'BOT_'
+
+    @validator("admins", "moders", pre=True)
+    def parse_json_list(cls, value: Any) -> list[int]:
+        """Parse JSON string to list of integers"""
+        return json.loads(value) if isinstance(value, str) else value
 
 
-class Payments(BaseSettings):
-
+class Payments(BaseConfig):
+    """Payments settings"""
     api_id: int
     api_key: str
     project_id: int
     project_secret: str
-
     enabled: bool
 
-
-class Settings(BaseSettings):
-    
-    bot: Bot
-    db: DB
-    redis: Redis
-    payments: Payments
-
     class Config:
-        
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = "__"
+        env_prefix = 'PAYMENTS_'
 
 
-def load_config(env_file=".env") -> Settings:
+class Settings(BaseConfig):
+    """Settings class"""
+    bot: Bot = Bot()
+    db: DB = DB()
+    redis: Redis = Redis()
+    payments: Payments = Payments()
+
+
+@lru_cache
+def load_config() -> Settings:
     """
-    Loads .env file into BaseSettings
-
-    :param str env_file: Env file, defaults to ".env"
-    :return Settings: Settings object
+    Loads .env file into Settings
+    Returns cached Settings instance
     """
-    
-    settings = Settings(_env_file=env_file)
-    return settings
+    return Settings()

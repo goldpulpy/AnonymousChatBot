@@ -1,3 +1,4 @@
+"""Admin keyboards"""
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 

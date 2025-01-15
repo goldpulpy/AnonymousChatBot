@@ -1,20 +1,15 @@
-from app.templates.keyboards import admin as nav
-
+"""Admin start handlers"""
 from aiogram import Router, types
 from aiogram.filters import CommandStart
 
-
-async def start(message: types.Message):
-
-    await message.answer(
-        'Админ-панель',
-        reply_markup=nav.reply.MENU,
-    )
+from app.templates.keyboards import admin as nav
 
 
+async def start(message: types.Message) -> None:
+    """Admin start handler"""
+    await message.answer('Админ-панель', reply_markup=nav.reply.MENU)
 
-def register(router: Router):
 
+def register(router: Router) -> None:
+    """Register admin start handlers"""
     router.message.register(start, CommandStart())
-
-

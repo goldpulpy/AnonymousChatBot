@@ -1,3 +1,4 @@
+"""Text utils"""
 from typing import Optional
 from aiogram import types
 
@@ -9,7 +10,7 @@ def escape(text: str) -> str:
     :param str text: Input text
     :return str: Escaped text
     """
-    
+
     return (
         text
         .replace('&', '&amp;')
@@ -18,7 +19,7 @@ def escape(text: str) -> str:
     )
 
 
-def link(user: types.User, text: str | None=None) -> str:
+def link(user: types.User, text: str | None = None) -> str:
     """
     Generate direct link
 
@@ -26,21 +27,22 @@ def link(user: types.User, text: str | None=None) -> str:
     :param str | None text: Link text, defaults to user's first name
     :return str: Direct link as href
     """
-    
+
     url = (
         'https://t.me/%s' % user.username
         if user.username else
         'tg://user?id=%i' % user.id
     )
-    
+
     return '<a href="%s">%s</a>' % (
         url, text or escape(user.first_name),
     )
 
 
-def get_ref(message: types.Message, check: bool=True) -> Optional[str]:
+def get_ref(message: types.Message, check: bool = True) -> Optional[str]:
     """
-    Get reflink of a message. If check is True, it will check if the message is a /start command.
+    Get reflink of a message. If check is True, it will check if the message is
+    a /start command.
 
     :param types.Message message: AIOGram message object
     :param bool check: Check if the message is a /start command
@@ -48,9 +50,7 @@ def get_ref(message: types.Message, check: bool=True) -> Optional[str]:
     """
 
     if check and not message.text.startswith('/start'):
-
         return
 
     if args := message.text.split()[1:]:
-        
         return args[0]

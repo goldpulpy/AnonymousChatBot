@@ -1,4 +1,4 @@
-import time
+"""Subscribe middleware"""
 import aiohttp
 import asyncio
 
@@ -19,43 +19,43 @@ from aiogram.exceptions import (
 )
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.token import TokenValidationError
-
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class SubMiddleware(BaseMiddleware):
     """
     Middleware for checking user's subscription
     """
 
-    def __init__(self):
-
+    def __init__(self) -> None:
+        """Subscribe middleware"""
         self.session = aiohttp.ClientSession()
 
-
     async def __call__(
-        self, 
+        self,
         handler: Callable[[Update, Dict[str, Any]], Awaitable[Any]],
         event: Update,
         data: Dict[str, Any],
     ) -> Any:
-
+        """Subscribe middleware"""
         user: Optional[User] = data.get('user')
         config: Settings = data['config']
         state: FSMContext = data['state']
         session: AsyncSession = data['session']
         chat: Optional[Chat] = data.get('event_chat')
-
         data["sponsors"] = []
 
-        if not chat or getattr(user, 'id', 0) in config.bot.admins or user.is_admin:
+        if (
+            not chat
+            or getattr(user, 'id', 0) in config.bot.admins
+            or user.is_admin
+        ):
             return await handler(event, data)
 
         state_data = await state.get_data()
 
-
         if chat.type != 'private' or user.is_vip:
-            
             return await handler(event, data)
 
         user = user or data.get('event_from_user')
@@ -65,17 +65,19 @@ class SubMiddleware(BaseMiddleware):
             .where(Sponsor.is_active == True)
         )
         sponsors = sponsors.all()
-
-
-        available_sponsors = await self.get_sponsors(sponsors, user, data['bot'])
+        available_sponsors = await self.get_sponsors(
+            sponsors, user, data['bot']
+        )
         data['sponsors'] = available_sponsors
-
-
         return await handler(event, data)
 
-
-    async def get_sponsors(self, sponsors: list[Sponsor], user: User, bot: Bot) -> list[Sponsor]:
-
+    async def get_sponsors(
+        self,
+        sponsors: list[Sponsor],
+        user: User,
+        bot: Bot
+    ) -> list[Sponsor]:
+        """Get sponsors"""
         response = await asyncio.gather(
             *(
                 self._check_sub(sponsor, user, bot)
@@ -93,37 +95,35 @@ class SubMiddleware(BaseMiddleware):
         if bool(not_subbed):
 
             return not_subbed + [
-                sponsor for sponsor in sponsors 
+                sponsor for sponsor in sponsors
                 if not sponsor.check
             ]
 
         return []
 
-
-    async def _check_sub(self, sponsor: Sponsor, user: User, bot: Bot) -> Optional[Sponsor]:
+    async def _check_sub(
+        self,
+        sponsor: Sponsor,
+        user: User,
+        bot: Bot
+    ) -> Optional[Sponsor]:
+        """Check subscription"""
         if sponsor.is_bot:
-            
-            try:
 
+            try:
                 bot_ = Bot(sponsor.access_id, session=bot.session)
                 await bot_.send_chat_action(user.id, 'typing')
 
             except TokenValidationError:
-
                 with suppress(ValueError):
-
                     self._validate_botstat_token(sponsor.access_id)
-
                     async with self.session.get(
                         'https://api.botstat.io/checksub/%s/%i' % (
                             sponsor.access_id, user.id,
                         )
                     ) as response:
-
                         data = await response.json(content_type=None)
-
                         if not data['ok']:
-
                             return sponsor
 
             except (
@@ -131,13 +131,10 @@ class SubMiddleware(BaseMiddleware):
                 TelegramBadRequest,
                 TelegramForbiddenError,
             ):
-            
                 return sponsor
 
         else:
-
             with suppress(TelegramAPIError):
-
                 member = await bot.get_chat_member(
                     sponsor.access_id,
                     user.id,
@@ -146,11 +143,9 @@ class SubMiddleware(BaseMiddleware):
                 if member.status in ('left', 'kicked', None):
                     return sponsor
 
-
     @staticmethod
     @lru_cache
-    def _validate_botstat_token(token: str):
-
+    def _validate_botstat_token(token: str) -> None:
+        """Validate botstat token"""
         if len(token.split('-')) != 5:
-
             raise ValueError

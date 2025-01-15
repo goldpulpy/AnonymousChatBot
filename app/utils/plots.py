@@ -1,7 +1,5 @@
+"""Plots utils"""
 import random
-
-from app.database.models import User, Bill
-
 from io import BytesIO
 from datetime import date, timedelta
 
@@ -13,9 +11,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.axes import Axes
 
+from app.database.models import User, Bill
+
 
 class BasePlotCreator(object):
-
+    """Base plot creator class"""
     DAYS = 20
     WIDTH = 10
 
@@ -25,13 +25,12 @@ class BasePlotCreator(object):
 
     @staticmethod
     def splitting(value: int) -> str:
+        """Splitting value to kilo"""
 
         if value == 0:
-
             return ''
 
         return '%.1fk' % (value / 1000)
-
 
     @classmethod
     async def create_plot(cls, session: AsyncSession) -> BytesIO:
@@ -42,46 +41,48 @@ class BasePlotCreator(object):
         figure, _ = cls.configure_axes(data, today)
 
         figure.tight_layout()
-
         file = BytesIO()
         figure.savefig(file)
-
         file.seek(0)
-
         plt.close()
 
         return file
 
     @staticmethod
     async def get_day(session: AsyncSession, date: date) -> int:
-        """
-        Method to be remapped in child classes.
-        """
+        """Method to be remapped in child classes."""
 
         return random.randint(500, 1000)
 
-
     @classmethod
     def get_offsets(cls, unix_time: date) -> list[date]:
+        """Get offsets for the plot"""
 
         start_date = unix_time - timedelta(days=cls.DAYS - 1)
-
         for days in range(cls.DAYS):
-
             yield start_date + timedelta(days)
-
 
     @classmethod
     async def get_data(cls, session: AsyncSession, unix_time: float) -> list:
-
+        """Get data for the plot"""
         return [
             await cls.get_day(session, offset)
             for offset in cls.get_offsets(unix_time)
         ]
 
-
     @classmethod
-    def _create_row(cls, axes: Axes, data: list, color: str, max_value: int, offset: float=0, width: float=0.4, bottom: bool=False, splitting: bool=False):
+    def _create_row(
+        cls,
+        axes: Axes,
+        data: list,
+        color: str,
+        max_value: int,
+        offset: float = 0,
+        width: float = 0.4,
+        bottom: bool = False,
+        splitting: bool = False,
+    ) -> None:
+        """Create a row for the plot"""
 
         positions = [
             position + offset
@@ -90,37 +91,35 @@ class BasePlotCreator(object):
         ]
 
         axes.bar(
-            positions, 
-            data, 
-            color=color, 
-            width=width, 
+            positions,
+            data,
+            color=color,
+            width=width,
             alpha=1,
         )
 
         for index, value in enumerate(data):
-
             axes.text(
-                index + offset, 
+                index + offset,
                 (
                     value + (max_value * 0.02)
                     if not bottom else
                     -(max_value * 0.035)
-                ), 
+                ),
                 (
-                    cls.splitting(value) 
+                    cls.splitting(value)
                     if splitting else
                     value if value else ''
-                ), 
+                ),
                 horizontalalignment='center',
-                color=color, 
+                color=color,
                 fontsize=(
                     10 if not bottom else 9
                 ),
             )
 
-
     @classmethod
-    def create_bars(cls, axes: Axes, data: list, max_value: int):
+    def create_bars(cls, axes: Axes, data: list, max_value: int) -> None:
         """
         Method to be remapped in child classes.
         """
@@ -132,12 +131,11 @@ class BasePlotCreator(object):
         axes.legend(
             handles=(
                 mpatches.Patch(
-                    color='#645fd5', 
+                    color='#645fd5',
                     label='Число',
                 ),
             )
         )
-
 
     @classmethod
     def configure_axes(cls, data: list, unix_time: float):
@@ -146,16 +144,14 @@ class BasePlotCreator(object):
             offset.strftime("%d.%m")
             for offset in cls.get_offsets(unix_time)
         ]
-
         max_value = max(data)
 
         if isinstance(max_value, tuple):
-
             max_value = max(max_value)
 
         figure, axes = plt.subplots(
-            figsize=(cls.WIDTH, 6), 
-            facecolor='white', 
+            figsize=(cls.WIDTH, 6),
+            facecolor='white',
             dpi=100,
         )
 
@@ -163,8 +159,8 @@ class BasePlotCreator(object):
             range(len(data)),
             date_labels,
             fontsize=10,
-            rotation=60, 
-            horizontalalignment='center', 
+            rotation=60,
+            horizontalalignment='center',
         )
         axes.set_title(
             cls.TITLE_TEMPLATE % (
@@ -173,11 +169,8 @@ class BasePlotCreator(object):
             ),
             fontsize=18,
         )
-        axes.set(
-            ylabel=cls.LABEL_Y,
-        )
+        axes.set(ylabel=cls.LABEL_Y)
         axes.set_ylim(-max_value * 0.05, max_value * 1.1)
-
         cls.create_bars(axes, data, max_value)
 
         return figure, axes
@@ -189,7 +182,7 @@ class PaymentPlot(BasePlotCreator):
 
     @classmethod
     async def get_day(cls, session: AsyncSession, date: date) -> int:
-
+        """Get day data"""
         return await session.scalar(
             select(func.sum(Bill.amount))
             .where(
@@ -198,9 +191,9 @@ class PaymentPlot(BasePlotCreator):
             )
         ) or 0
 
-
     @classmethod
-    def create_bars(cls, axes: Axes, data: list, max_value: int):
+    def create_bars(cls, axes: Axes, data: list, max_value: int) -> None:
+        """Create bars for the plot"""
 
         cls._create_row(
             axes, data, '#645fd5', max_value,
@@ -208,7 +201,7 @@ class PaymentPlot(BasePlotCreator):
         axes.legend(
             handles=(
                 mpatches.Patch(
-                    color='#645fd5', 
+                    color='#645fd5',
                     label='Сумма',
                 ),
             )
@@ -221,7 +214,7 @@ class UsersPlot(BasePlotCreator):
 
     @classmethod
     async def get_day(cls, session: AsyncSession, date: date) -> tuple:
-
+        """Get day data"""
         return (
             await session.scalar(
                 select(func.count(User.id))
@@ -239,10 +232,9 @@ class UsersPlot(BasePlotCreator):
             ),
         )
 
-
     @classmethod
-    def create_bars(cls, axes: Axes, data: list, max_value: int):
-
+    def create_bars(cls, axes: Axes, data: list, max_value: int) -> None:
+        """Create bars for the plot"""
         active = [
             item[0] for item in data
         ]
@@ -260,11 +252,11 @@ class UsersPlot(BasePlotCreator):
         axes.legend(
             handles=(
                 mpatches.Patch(
-                    color='#645fd5', 
+                    color='#645fd5',
                     label='Пользователи',
                 ),
                 mpatches.Patch(
-                    color='#ae1311', 
+                    color='#ae1311',
                     label='Заблокированные',
                 ),
             )

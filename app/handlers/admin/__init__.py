@@ -1,3 +1,5 @@
+"""Admin handlers"""
+from aiogram import Router
 from . import (
     dump,
     start,
@@ -11,16 +13,9 @@ from . import (
     rooms,
 )
 
-from aiogram import Router
 
-
-def setup(router: Router):
-    """
-    Register admin handlers.
-
-    :param Router router: Admin Router
-    """
-    
+def setup(router: Router) -> None:
+    """Register admin handlers"""
     start.register(router)
     commands.register(router)
     dump.register(router)
