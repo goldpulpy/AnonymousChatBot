@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    container_name: anonymous-chat-bot-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      TZ: ${BOT_TIMEZONE}
+    volumes:
+      - anonymous-chat-bot-db:/var/lib/postgresql/data
+
+  app:
+    image: anonymous-chat-bot
+    container_name: anonymous-chat-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  anonymous-chat-bot-db:
