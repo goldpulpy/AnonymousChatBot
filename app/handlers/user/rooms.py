@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from settings import CHANGE_NICKNAME_IN_ROOM_PRICE
+from prices import CHANGE_NICKNAME_IN_ROOM_PRICE
 from app.templates import texts
 from app.templates.keyboards import user as nav
 from app.database.models import User, Room
@@ -402,11 +402,13 @@ def register(router: Router):
     router.message.register(leave_room, Command('leave'))
     router.message.register(room_members, Command('members'))
     router.message.register(room_members, Text("Участники 👤"))
-    router.message.register(pre_change_nickname,
-                            Text("Сменить ник в комнате 🔄"))
+    router.message.register(
+        pre_change_nickname, Text("Сменить ник в комнате 🔄")
+    )
     router.callback_query.register(change_nickname, Text('change:nickname'))
-    router.message.register(new_change_nickname,
-                            StateFilter('change.nickname'))
+    router.message.register(
+        new_change_nickname, StateFilter('change.nickname')
+    )
     router.callback_query.register(
         accept_change_nickname, Text(startswith='accept:change:nickname'))
     router.callback_query.register(

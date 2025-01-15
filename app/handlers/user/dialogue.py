@@ -14,7 +14,7 @@ from sqlalchemy import delete, or_, func, update
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from settings import SHOW_CONTACTS_PRICE
+from prices import SHOW_CONTACTS_PRICE
 from app.filters import InDialogue
 from app.templates import texts
 from app.templates.keyboards import user as nav
@@ -173,7 +173,7 @@ async def get_dialogue_id(session: AsyncSession) -> int:
 
 
 async def create_dialogue(
-    bot: Bot, session: AsyncSession, first: int, second: int, 
+    bot: Bot, session: AsyncSession, first: int, second: int,
     friend: bool = False
 ) -> None:
     """Create dialogue"""

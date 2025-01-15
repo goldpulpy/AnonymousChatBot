@@ -1,9 +1,9 @@
 """User inline keyboards"""
-from settings import VIP_OPTIONS
-from app.database.models import Sponsor
-from app.utils.payments import BaseBill
-
+from typing import List
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from prices import VIP_OPTIONS
+from app.database.models import Sponsor, Room
+from app.utils.payments import BaseBill
 
 
 def split(items: list, size: int) -> list[list]:
@@ -329,7 +329,7 @@ def friend_dialogue_request(friend_id: int) -> InlineKeyboardMarkup:
     )
 
 
-def room_list(rooms: list) -> InlineKeyboardMarkup:
+def room_list(rooms: List[Room]) -> InlineKeyboardMarkup:
     """Room list keyboard"""
     return InlineKeyboardMarkup(
         inline_keyboard=[

@@ -21,5 +21,5 @@ VIP_OPTIONS = {
         'days': 365,
     },
 }
-SHOW_CONTACTS_PRICE: int = 10  # Price for show contacts button
-CHANGE_NICKNAME_IN_ROOM_PRICE: int = 10  # Price for change nickname in room
+SHOW_CONTACTS_PRICE: int = 10  # Цена за показ контактов
+CHANGE_NICKNAME_IN_ROOM_PRICE: int = 10  # Цена за смену никнейма в комнате

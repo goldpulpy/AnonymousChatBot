@@ -5,7 +5,7 @@ from aiogram.filters import Text
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from settings import VIP_OPTIONS
+from prices import VIP_OPTIONS
 from app.filters import IsVip
 from app.templates import texts
 from app.templates.keyboards import user as nav
@@ -161,9 +161,11 @@ def register(router: Router) -> None:
     router.message.register(vip_menu, Text('VIP 👑'))
     router.callback_query.register(vip_menu, Text('vip'))
     router.callback_query.register(
-        pre_balance_bill, Text(startswith='buy:balance'))
+        pre_balance_bill, Text(startswith='buy:balance')
+    )
     router.callback_query.register(
-        balance_bill, Text(startswith='accept:buy:balance'))
+        balance_bill, Text(startswith='accept:buy:balance')
+    )
     router.callback_query.register(create_bill, Text(startswith='buy:url'))
     router.callback_query.register(choose_bill, Text(startswith='buy:'))
     router.callback_query.register(check_bill, Text(startswith='check:vip:'))
