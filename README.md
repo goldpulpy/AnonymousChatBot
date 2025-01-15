@@ -57,21 +57,21 @@
     BOT_USE_REDIS=False # Использовать Redis (По умолчанию False)
 
     # Настройки Базы данных (PostgreSQL)
-    DB_HOST=db
-    DB_PORT=5432
+    DB_HOST=db # Взято из docker-compose.yml
+    DB_PORT=5432 # Взято из docker-compose.yml
     DB_NAME=YOUR_DB_NAME # Название БД, Например anonchat
     DB_USER=YOUR_DB_USER # Пользователь, Например root
     DB_PASSWORD=YOUR_DB_PASSWORD # Пароль, Например toor
 
-    # Настройки Redis (Если используете Redis)
+    # Настройки Redis (Если не используете Redis, то оставьте как есть)
     REDIS_HOST=redis
     REDIS_DB=13
 
     # Настройки Payments (PAYOK.IO)
-    PAYMENTS_API_ID=YOUR_API_ID
-    PAYMENTS_API_KEY=YOUR_API_KEY
-    PAYMENTS_PROJECT_ID=YOUR_PROJECT_ID
-    PAYMENTS_PROJECT_SECRET=YOUR_PROJECT_SECRET
+    PAYMENTS_API_ID=YOUR_API_ID # Ваш API ID
+    PAYMENTS_API_KEY=YOUR_API_KEY # Ваш API KEY
+    PAYMENTS_PROJECT_ID=YOUR_PROJECT_ID # Ваш Project ID
+    PAYMENTS_PROJECT_SECRET=YOUR_PROJECT_SECRET # Ваш Project Secret
     PAYMENTS_ENABLED=False # Установите в True на production
    ```
 
